@@ -22,12 +22,11 @@ function Rectangle(x, y, width, height) {
   }
 }
 
-function getLocateString(string) {
-	var enStrings = {
+function getLocateString(string) {	
+	var enStrings = {"evaluation":"Evaluation",
 	                 "ok":"OK",
 					 "cancel":"Cancel",
 					 "clear":"Clear",
-				
 	                };
 	var strings = {"en":enStrings,};
 				   
@@ -625,7 +624,7 @@ class SigCaptDialog {
 		  this.mModalBackground.style.position = "fixed";
           document.getElementsByTagName('body')[0].appendChild(this.mModalBackground);
 	  }
-	  		  	  
+	    	  
 	      let titleBarHeight = this.config.hasTitle ? 25 : 0;
 	      let margin = 0;
 	      this.mSignatureWindow = document.createElement('div');
@@ -643,7 +642,7 @@ class SigCaptDialog {
 			  this.mSignatureWindow.style.top = this.config.top;
               this.mSignatureWindow.style.left = this.config.left;
 		  }
-          this.mSignatureWindow.style.width =  "350px";
+                this.mSignatureWindow.style.width =  "350px";
           this.mSignatureWindow.style.height =  "282px";
 		  this.mSignatureWindow.style.borderRadius = "10px"
 	      //this.mSignatureWindow.style.opacity = this.config.background.alpha;		
@@ -656,7 +655,7 @@ class SigCaptDialog {
 	          this.mTitleBar.style.width = "100%";
               this.mTitleBar.style.height = titleBarHeight+"px";
 		      this.mTitleBar.style.backgroundColor = this.config.borderColor;
-			  this.mTitleBar.style.color = "white"
+			   this.mTitleBar.style.color = "white"
 	          this.mTitleBar.innerHTML = '<div style="padding-left:5px;display: table-cell; vertical-align: middle;height:'+titleBarHeight+'px;">'+this.config.title+'</div>';
 	          this.mSignatureWindow.appendChild(this.mTitleBar);
 		  }
@@ -692,7 +691,7 @@ class SigCaptDialog {
 
 	      if (this.config.draggable) {
 	          this.setDraggable();
-		  }
+	  }
 	  
 	  this.mLoadingImageDiv = document.createElement('div');
 	  this.mLoadingImageDiv.style.display="table"
@@ -774,7 +773,7 @@ class SigCaptDialog {
 		button.style.top = bounds.y+"px";		
 		button.style.width = bounds.width+"px";
 		button.style.height = bounds.height+"px";
-		button.style.font = "20px "+this.config.buttonsFont;	
+			button.style.font = "20px "+this.config.buttonsFont;	
 		button.style.color = this.config.buttons[i].textColor;
 		button.style.backgroundColor = this.config.buttons[i].backgroundColor;
 		button.style.border = this.config.buttons[i].borderWidth + "px solid "+this.config.buttons[i].borderColor;
@@ -784,10 +783,11 @@ class SigCaptDialog {
         button.addEventListener("touchend", function(e) {e.preventDefault(); btn.Click(); return false;}, false);		
 		this.mFormDiv.appendChild(button);	  		       
 	}	  
-	
-	
 
-	
+	if (this.sigObj.isEvaluation()) {
+	    this.drawEvaluationString(getLocateString("evaluation"), ctx, this.canvas.width, this.canvas.height - buttonsTop, useColor);
+	}
+
 	let dateOffsetY = 0;
 	// draw date
 	const date = new Date();
@@ -817,9 +817,6 @@ class SigCaptDialog {
 		}	
 	}
 
- 
-	
-	
 	ctx.stroke();
 	return canvas.toDataURL("image/jpeg"); 
   }
@@ -1335,6 +1332,40 @@ class SigCaptDialog {
 	    const pxHeight = el.offsetHeight;
 	    document.body.removeChild(el);
 	    return {width:pxWidth, height:pxHeight};
+    }
+ 	
+	drawEvaluationString(evaluationString, context, width, height, useColor) {
+		evaluationString = " "+evaluationString+" ";
+        // get the hypotenuse, as we are going to write the text in diagonal
+	    const hypotenuse = Math.sqrt(width*width + height*height);
+
+        // then get the desire text size
+        let testTextSize = 300.0;    
+        context.font = "300px verdana";
+		let textMetrics = context.measureText(evaluationString);
+	    let desiredTextSize = (testTextSize * hypotenuse / textMetrics.width);
+
+        // we need to reduce this text according to the height size
+        context.font = desiredTextSize+"px verdana";
+        textMetrics = context.measureText(evaluationString);   
+
+        // find the rotation angle
+        const angle = Math.atan(height/width);
+    
+        // get the new width taking on account the height
+	    const newWidth = hypotenuse - ((textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent) * Math.cos(-angle));
+
+        // Calculate the desired size as a proportion of our testTextSize.
+        desiredTextSize = desiredTextSize * newWidth / textMetrics.width;
+        context.font = desiredTextSize+"px verdana";
+        textMetrics = context.measureText(evaluationString);   
+
+        context.save();
+        context.fillStyle = useColor ? "LightGray" : "#000000";		
+        context.translate(width/2, height/2);		
+        context.rotate(-angle);
+        context.fillText(evaluationString, -textMetrics.width/2, (textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent)/2);
+        context.restore();
     }
 	
 	startTimeOut() {
