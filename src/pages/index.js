@@ -1,17 +1,17 @@
-import Head from 'next/head';
-import { useEffect, useRef, useState } from 'react';
-import styles from '../styles/Simple.module.css';
-import dynamic from 'next/dynamic';
+import Head from "next/head";
+import { useEffect, useRef, useState } from "react";
+import styles from "../styles/Simple.module.css";
+import dynamic from "next/dynamic";
 
-const CanvasDraw = dynamic(() => import('react-canvas-draw'), {
+const CanvasDraw = dynamic(() => import("react-canvas-draw"), {
   ssr: false,
 });
 
 const signersData = {
-  "data": [
-    { "type": "owner", "name": "Auric" },
-    { "type": "secondary", "name": "test123" }
-  ]
+  data: [
+    { type: "owner", name: "Auric" },
+    { type: "secondary", name: "test123" },
+  ],
 };
 
 export default function SimpleDemoPage() {
@@ -25,10 +25,10 @@ export default function SimpleDemoPage() {
   const saveInlineCanvas = (signerIndex) => {
     const wrapperDiv = wrapperRefs.current[signerIndex];
     if (!wrapperDiv) return;
-    const canvasElement = wrapperDiv.querySelector('canvas:nth-of-type(2)');
+    const canvasElement = wrapperDiv.querySelector("canvas:nth-of-type(2)");
     if (canvasElement) {
       const image = canvasElement.toDataURL("image/png");
-      setSignatures(prevSignatures =>
+      setSignatures((prevSignatures) =>
         prevSignatures.map((sig, index) =>
           index === signerIndex ? { ...sig, sigImage: image } : sig
         )
@@ -42,7 +42,10 @@ export default function SimpleDemoPage() {
     const { sigSDK } = sdkInstances.current;
     if (sigSDK) {
       const newSigObj = new sigSDK.SigObj();
-      await newSigObj.setLicence("your_key", "your_secret");
+      await newSigObj.setLicence(
+        "20541788-6683-4402-b943-2b6b34967d60",
+        "OkzWwmfVv4pBfSJRFDWLiFieHxBHFhEiHCovt80ry5G+F7JzKVQtZweecqJ/lvFjODpNhc5SSHNC/nv2VmXgug=="
+      );
       sdkInstances.current.mSigObj = newSigObj;
     }
   };
@@ -53,14 +56,16 @@ export default function SimpleDemoPage() {
     }
     const initializeDemo = async () => {
       try {
-        const { default: SigSDK } = await import('javascript-signature-sdk');
-        const sigSDK = await new SigSDK({ locateFile: () => '/signature-sdk.wasm' });
+        const { default: SigSDK } = await import("javascript-signature-sdk");
+        const sigSDK = await new SigSDK({
+          locateFile: () => "/signature-sdk.wasm",
+        });
         sdkInstances.current.sigSDK = sigSDK;
         await resetSdkObject();
-        const initialSignatures = signersData.data.map(signer => ({
+        const initialSignatures = signersData.data.map((signer) => ({
           ...signer,
           sigImage: null,
-          canvasKey: 1
+          canvasKey: 1,
         }));
         setSignatures(initialSignatures);
         setButtonsDisabled(false);
@@ -77,8 +82,18 @@ export default function SimpleDemoPage() {
   const renderAndSaveSignature = async (signerIndex) => {
     const { mSigObj } = sdkInstances.current;
     try {
-      const image = await mSigObj.renderBitmap(300, 150, "image/png", 4, "#000000", "transparent", 0, 0, 0);
-      setSignatures(prevSignatures =>
+      const image = await mSigObj.renderBitmap(
+        300,
+        150,
+        "image/png",
+        4,
+        "#000000",
+        "transparent",
+        0,
+        0,
+        0
+      );
+      setSignatures((prevSignatures) =>
         prevSignatures.map((sig, index) =>
           index === signerIndex ? { ...sig, sigImage: image } : sig
         )
@@ -92,11 +107,22 @@ export default function SimpleDemoPage() {
 
   const captureFromCanvas = async (signerIndex) => {
     try {
-      const { default: SigCaptDialog } = await import('../lib/sigCaptDialog/sigCaptDialog.js');
+      const { default: SigCaptDialog } = await import(
+        "../lib/sigCaptDialog/sigCaptDialog.js"
+      );
       const { sigSDK, mSigObj } = sdkInstances.current;
       const sigCaptDialog = new SigCaptDialog(sigSDK, {});
-      sigCaptDialog.addEventListener("ok", () => renderAndSaveSignature(signerIndex));
-      await sigCaptDialog.open(mSigObj, " ", " ", null, sigSDK.KeyType.SHA512, null);
+      sigCaptDialog.addEventListener("ok", () =>
+        renderAndSaveSignature(signerIndex)
+      );
+      await sigCaptDialog.open(
+        mSigObj,
+        "Customer",
+        " ",
+        null,
+        sigSDK.KeyType.SHA512,
+        null
+      );
       sigCaptDialog.startCapture();
     } catch (error) {
       console.error("Failed to open canvas capture dialog:", error);
@@ -106,18 +132,29 @@ export default function SimpleDemoPage() {
 
   const captureFromSTU = async (signerIndex) => {
     try {
-      const { default: StuCaptDialog } = await import('../lib/sigCaptDialog/stuCaptDialog.js');
+      const { default: StuCaptDialog } = await import(
+        "../lib/sigCaptDialog/stuCaptDialog.js"
+      );
       const { sigSDK, mSigObj } = sdkInstances.current;
       const stuCapDialog = new StuCaptDialog(sigSDK);
-      stuCapDialog.addEventListener("ok", () => renderAndSaveSignature(signerIndex));
-      await stuCapDialog.open(mSigObj, " ", " ", null, sigSDK.KeyType.SHA512, null);
+      stuCapDialog.addEventListener("ok", () =>
+        renderAndSaveSignature(signerIndex)
+      );
+      await stuCapDialog.open(
+        mSigObj,
+        "Customer",
+        " ",
+        null,
+        sigSDK.KeyType.SHA512,
+        null
+      );
     } catch (error) {
       console.error("Failed to open STU capture dialog:", error);
     }
   };
 
   const clearSignature = (signerIndex) => {
-    setSignatures(prevSignatures =>
+    setSignatures((prevSignatures) =>
       prevSignatures.map((sig, index) =>
         index === signerIndex ? { ...sig, sigImage: null } : sig
       )
@@ -125,10 +162,10 @@ export default function SimpleDemoPage() {
   };
 
   const handleSubmit = () => {
-    const formattedData = signatures.map(signer => ({
+    const formattedData = signatures.map((signer) => ({
       signName: signer.name,
       signType: signer.type,
-      sign: signer?.sigImage?.split(',')[1]
+      sign: signer?.sigImage?.split(",")[1],
     }));
     console.log(formattedData);
   };
@@ -148,9 +185,14 @@ export default function SimpleDemoPage() {
       )} */}
       <main className={styles.pageContainer}>
         <div className={styles.card}>
-          {isStuAvailable && (<button onClick={() => captureFromSTU()} className={`${styles.button} ${styles.buttonSecondary}`}>
-            STU
-          </button>)}
+          {isStuAvailable && (
+            <button
+              onClick={() => captureFromSTU()}
+              className={`${styles.button} ${styles.buttonSecondary}`}
+            >
+              STU
+            </button>
+          )}
           <div className={styles.signaturesGrid}>
             {signatures.map((signer, index) => (
               <div key={index} className={styles.signatureCard}>
@@ -163,11 +205,15 @@ export default function SimpleDemoPage() {
                   <div className={styles.signatureBox}>
                     {signer.sigImage ? (
                       <div className={styles.signatureContent}>
-                        <img src={signer.sigImage} alt={`Signature of ${signer.name}`} className={styles.signatureImage} />
+                        <img
+                          src={signer.sigImage}
+                          alt={`Signature of ${signer.name}`}
+                          className={styles.signatureImage}
+                        />
                       </div>
                     ) : (
                       <div
-                        ref={el => (wrapperRefs.current[index] = el)}
+                        ref={(el) => (wrapperRefs.current[index] = el)}
                         className={styles.inlineCanvasWrapper}
                         onMouseUp={() => saveInlineCanvas(index)}
                         onTouchEnd={() => saveInlineCanvas(index)}
@@ -188,11 +234,18 @@ export default function SimpleDemoPage() {
                 {/* Bagian bawah: Tombol Aksi */}
                 <div className={styles.buttonGroup}>
                   {signer.sigImage ? (
-                    <button onClick={() => clearSignature(index)} className={`${styles.button} ${styles.buttonDanger}`}>
+                    <button
+                      onClick={() => clearSignature(index)}
+                      className={`${styles.button} ${styles.buttonDanger}`}
+                    >
                       Hapus
                     </button>
                   ) : (
-                    <button onClick={() => captureFromCanvas(index)} disabled={buttonsDisabled} className={`${styles.button} ${styles.buttonPrimary}`}>
+                    <button
+                      onClick={() => captureFromCanvas(index)}
+                      disabled={buttonsDisabled}
+                      className={`${styles.button} ${styles.buttonPrimary}`}
+                    >
                       Tanda Tangan di Canvas
                     </button>
                   )}
