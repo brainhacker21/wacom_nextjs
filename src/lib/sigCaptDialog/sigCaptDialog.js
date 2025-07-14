@@ -1,5 +1,5 @@
 import { getBrowserNameAndOS } from "../common/browser-report.js";
-
+import styles from "./style/sigCaptDialog.module.css";
 function Button() {
   this.Bounds; // in Screen coordinates
   this.Text;
@@ -886,11 +886,15 @@ class SigCaptDialog {
   createWindow(width, height) {
     if (this.config.modal) {
       this.mModalBackground = document.createElement("div");
-      this.mModalBackground.id = "modal-background";
       this.mModalBackground.className = "active";
+      this.mModalBackground.style.position = "absolute";
+      this.mModalBackground.style.top = "0";
+      this.mModalBackground.style.left = "0";
       this.mModalBackground.style.width = "100%";
       this.mModalBackground.style.height = "100%";
-      this.mModalBackground.style.position = "fixed";
+      this.mModalBackground.style.backgroundColor = "white"; // Gunakan camelCase
+      this.mModalBackground.style.opacity = "0.5";
+      this.mModalBackground.style.zIndex = "1000"; // Gunakan camelCase
       document
         .getElementsByTagName("body")[0]
         .appendChild(this.mModalBackground);
@@ -1035,8 +1039,7 @@ class SigCaptDialog {
     this.mLoadingImageDiv.style.backgroundColor = "white";
     this.mLoadingImageDiv.style.width = "100%";
     this.mLoadingImageDiv.style.height = "100%";
-    this.mLoadingImageDiv.innerHTML =
-      '<div id="loadingDiv" style="padding-left:10px;display:table-cell;vertical-align:middle;"><table><tr><td><div class="loader"></div></td><td>Loading the image, this could take a few seconds...</td></tr></table></div>';
+    this.mLoadingImageDiv.innerHTML = `<div id="loadingDiv" style="padding-left:10px;display:table-cell;vertical-align:middle;"><table><tr><td><div class=${styles.loader}></div></td><td>Loading the image, this could take a few seconds...</td></tr></table></div>`;
     this.mFormDiv.appendChild(this.mLoadingImageDiv);
 
     this.mGeneratingSignatureDiv = document.createElement("div");
@@ -1046,8 +1049,8 @@ class SigCaptDialog {
     this.mGeneratingSignatureDiv.style.width = "100%";
     this.mGeneratingSignatureDiv.style.height = "100%";
     this.mGeneratingSignatureDiv.style.zIndex = "10";
-    this.mGeneratingSignatureDiv.innerHTML =
-      '<div id="generatingDiv" style="padding-left:10px;display:table-cell;vertical-align:middle;z-index:9"><table><tr><td><div class="loader"></div></td><td>Generating the signature, this could take a few seconds...</td></tr></table></div>';
+    this.mGeneratingSignatureDiv.style.color = "black";
+    this.mGeneratingSignatureDiv.innerHTML = `<div id="generatingDiv" style="padding-left:10px;display:table-cell;vertical-align:middle;z-index:9"><table><tr><td><div class=${styles.loader}></div></td><td>Generating the signature, this could take a few seconds...</td></tr></table></div>`;
     this.mFormDiv.appendChild(this.mGeneratingSignatureDiv);
   }
 
